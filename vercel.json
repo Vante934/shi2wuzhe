@@ -1,0 +1,32 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://ministry-bottles-described-light.trycloudflare.com/api/:path*"
+    },
+    {
+      "source": "/captchaImage",
+      "destination": "https://ministry-bottles-described-light.trycloudflare.com/captchaImage"
+    },
+    {
+      "source": "/login",
+      "destination": "https://ministry-bottles-described-light.trycloudflare.com/login"
+    },
+    {
+      "source": "/getInfo",
+      "destination": "https://ministry-bottles-described-light.trycloudflare.com/getInfo"
+    },
+    {
+      "source": "/logout",
+      "destination": "https://ministry-bottles-described-light.trycloudflare.com/logout"
+    },
+    {
+      "source": "/register",
+      "destination": "https://ministry-bottles-described-light.trycloudflare.com/register"
+    },
+    {
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "识食物者",
+  "description": "一个高灵感、智能的美食搭配与菜谱推荐生鲜社区。在这里，好好吃饭，寻找随机美味，建立属于你自己的厨房小天地。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
