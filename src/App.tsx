@@ -184,10 +184,9 @@ function App() {
   // 全局轻提示解构
   const { toastMessage, showToast } = useToast();
   // ⭐ 这三个 state 必须在 useFoodSelection 之前声明，否则报"声明之前已使用"
-  const [cookingLevel, setCookingLevel] = useState<'junior' | 'senior'>('junior');
-  const [forbiddenFoodsSelected, setForbiddenFoodsSelected] = useState<string[]>(['洋葱头']);
-  const [allergens, setAllergens] = useState<string[]>(['牛奶']);
-
+const [cookingLevel, setCookingLevel] = useState<'junior' | 'senior'>('senior');
+const [forbiddenFoodsSelected, setForbiddenFoodsSelected] = useState<string[]>([]);
+const [allergens, setAllergens] = useState<string[]>([]);
   // ============ 烹饪日志模块逻辑抽取 ============
   const {
     cookingLogs,
@@ -287,12 +286,12 @@ function App() {
   const [recipeTabMode, setRecipeTabMode] = useState<'published' | 'savedPosts' | 'drafts' | 'savedRecipes'>('published');
   // 个性化扩展偏好状态
   const [tasteTendency, setTasteTendency] = useState<string>('不挑（默认）');
-  const [avoidTags, setAvoidTags] = useState<string[]>(['香菜', '大蒜']);
+  const [avoidTags, setAvoidTags] = useState<string[]>([]);
   const [customAvoids, setCustomAvoids] = useState<string[]>([]);
   const [avoidSearchText, setAvoidSearchText] = useState('');
   const [customAllergens, setCustomAllergens] = useState<string[]>([]);
   const [allergenSearchText, setAllergenSearchText] = useState('');
-  const [mealReminder, setMealReminder] = useState<boolean>(true);
+  const [mealReminder, setMealReminder] = useState<boolean>(false);
   const [reminderTime, setReminderTime] = useState('12:00');
 
   // 用户原创菜谱初始模拟数据
@@ -1213,12 +1212,14 @@ useEffect(() => {
                             isOpen: true,
                             title: '确定要退出登录吗？',
                             message: '退出后将返回到登录页，您可重新登录或以游客身份继续浏览。',
-                            onConfirm: () => {
-                              import('./api').then(({ authApi, storage }) => {
-                                authApi.logout();
-                                storage.clearAll();  // 清干净所有缓存（包括游客标记）
+                            onConfirm: async () => {
+                              try {
+                                const { authApi, storage } = await import('./api');
+                                await authApi.logout().catch(() => {});  // ⭐ 失败也忽略
+                                storage.clearAll();
+                              } finally {
                                 window.location.reload();
-                              });
+                              }
                             }
                           });
                         }}
@@ -1500,32 +1501,9 @@ useEffect(() => {
 }
 
 // ====================================================
-// 登录守卫包装层 - 独立于 App 组件，保证 Hooks 规则
+// 登录守卫包装层 - 简化：首次进入直接进 App
+// 登录弹窗由 App 内部 WelcomePage 的 onClickAnywhere 触发
 // ====================================================
 export default function AppWithAuth() {
-  const [hasIdentity, setHasIdentity] = useState<boolean>(() => {
-    const token = localStorage.getItem('shi2wuzhe_token');
-    const guest = localStorage.getItem('shi2wuzhe_guest_mode');
-    console.log('[AppWithAuth] 启动身份判断:', { token: !!token, guest });
-    return !!token || guest === '1';
-  });
-
-  if (!hasIdentity) {
-    return (
-      <LoginPage
-        onLoginSuccess={() => {
-          console.log('🟢 登录成功');
-          localStorage.removeItem('shi2wuzhe_guest_mode');
-          setHasIdentity(true);
-        }}
-        onGoGuest={() => {
-          console.log('🟢 游客模式');
-          localStorage.setItem('shi2wuzhe_guest_mode', '1');
-          setHasIdentity(true);
-        }}
-      />
-    );
-  }
-
   return <App />;
 }

@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { storage } from '../api';
 import { authApi } from '../api/modules/auth';
+import { userApi } from '../api/modules/user';
 
 export interface CurrentUserVM {
   userId: number | null;
@@ -54,28 +55,41 @@ export function useCurrentUser() {
     };
   };
 
-  useEffect(() => {
-    const token = storage.getToken();
-    
-    if (!token) {
-      setUser({ ...DEFAULT_USER, isGuest: storage.isGuest() });
-      return;
-    }
+useEffect(() => {
+  const token = storage.getToken();
 
-    const cached = storage.getUserInfo();
-    if (cached?.user) {
-      setUser(mapUser(cached.user));
-    }
+  if (!token) {
+    setUser({ ...DEFAULT_USER, isGuest: storage.isGuest() });
+    return;
+  }
 
-    setLoading(true);
-    authApi.getInfo()
-      .then((info) => setUser(mapUser(info.user)))
-      .catch((err) => {
-        console.warn('[useCurrentUser] 获取用户信息失败', err);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const cached = storage.getUserInfo();
+  if (cached?.user) {
+    setUser(mapUser(cached.user));
+  }
 
+  setLoading(true);
+  authApi.getInfo()
+    .then(async (info) => {
+      const baseUser = mapUser(info.user);
+
+      // ⭐ 额外拉 user_extend，补上 customAvatar 和 bio
+      try {
+        const extRes = await userApi.getMyExtend();
+        const ext = (extRes.data || {}) as any;
+        if (ext.customAvatar) baseUser.avatar = ext.customAvatar;
+        if (ext.bio) baseUser.bio = ext.bio;
+      } catch (e) {
+        console.warn('[useCurrentUser] 拉扩展信息失败', e);
+      }
+
+      setUser(baseUser);
+    })
+    .catch((err) => {
+      console.warn('[useCurrentUser] 获取用户信息失败', err);
+    })
+    .finally(() => setLoading(false));
+}, []);
   const updateLocal = (patch: Partial<CurrentUserVM>) => {
     setUser((prev) => ({ ...prev, ...patch }));
   };

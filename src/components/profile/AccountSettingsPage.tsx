@@ -51,6 +51,7 @@ export default function AccountSettingsPage({
                   type="button"
                   onClick={() => {
                     setProfileAvatar(emoji);
+                    localStorage.setItem('shi2wuzhe_custom_avatar', emoji);  // ⭐ 持久化
                     showToast('头像标识已更新，记得点击保存！');
                   }}
                   className={`w-18 h-18 rounded-full border-2 text-3xl flex items-center justify-center transition-all cursor-pointer ${
@@ -76,9 +77,19 @@ export default function AccountSettingsPage({
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       const file = e.target.files[0];
-                      const url = URL.createObjectURL(file);
-                      setProfileAvatar(url);
-                      alert('头像自定义上传成功！已更新到您的个人中心和主页');
+                      // ⭐ 限制大小 2MB，防止 base64 太长
+                      if (file.size > 500 * 1024) {
+                        alert('图片不能超过 500KB，请压缩后再上传');
+                        return;
+                      }
+                      // ⭐ 用 base64 而非 blob URL（blob URL 刷新就失效）
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const dataUrl = ev.target?.result as string;
+                        setProfileAvatar(dataUrl);
+                        showToast('图片已上传，记得点击保存！');
+                      };
+                      reader.readAsDataURL(file);
                     }
                   }}
                 />
@@ -126,13 +137,26 @@ export default function AccountSettingsPage({
         {/* ⭐ 删除：原 CARD 4 第三方账号绑定整块（含手机号/微信/B站） */}
 
         <div className="pt-2 flex flex-wrap items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={() => showToast('资料保存成功！基本信息已更新')}
-            className="bg-brand-green hover:bg-brand-green-dark text-white font-extrabold text-base py-3 px-8 rounded-full cursor-pointer shadow-md transition-all active:scale-95 flex items-center gap-1"
-          >
-            保存修改
-          </button>
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              const { userApi } = await import('../../api');
+              await userApi.updateProfile({
+                nickName: profileNickname,
+                customAvatar: profileAvatar,
+                bio: profileBio,
+              });
+              showToast('资料保存成功！');
+            } catch (err) {
+              console.error('[AccountSettings] 保存失败', err);
+              showToast('保存失败，请稍后重试');
+            }
+          }}
+          className="bg-brand-green hover:bg-brand-green-dark text-white font-extrabold text-base py-3 px-8 rounded-full cursor-pointer shadow-md transition-all active:scale-95 flex items-center gap-1"
+        >
+          保存修改
+        </button>
 
           <button
             type="button"

@@ -59,17 +59,21 @@ service.interceptors.response.use(
 
     const code = res.code ?? 200;
 
-    if (code === 401) {
-      // 游客模式：静默忽略，不跳登录
-      if (storage.isGuest()) {
-        return Promise.reject(new Error('游客模式无法使用此功能'));
-      }
-      storage.clearAll();
-      if (globalAuthHandler) {
-        globalAuthHandler();
-      }
-      return Promise.reject(new Error(res.msg || '登录状态已过期，请重新登录'));
-    }
+if (code === 401) {
+  // 游客模式：静默
+  if (storage.isGuest()) {
+    return Promise.reject(new Error('游客模式无法使用此功能'));
+  }
+  // ⭐ 没 token 也静默（避免退出登录后死循环）
+  if (!storage.getToken()) {
+    return Promise.reject(new Error('未登录'));
+  }
+  storage.clearAll();
+  if (globalAuthHandler) {
+    globalAuthHandler();
+  }
+  return Promise.reject(new Error(res.msg || '登录状态已过期，请重新登录'));
+}
 
     // 500 业务失败
     if (code === 500) {
@@ -97,14 +101,17 @@ service.interceptors.response.use(
     let msg = '网络异常，请稍后重试';
     if (error.response) {
       const status = error.response.status;
-      if (status === 401) {
-        if (storage.isGuest()) {
-        // 游客静默
+    if (status === 401) {
+      if (storage.isGuest()) {
         return Promise.reject(error);
-        }
-        storage.clearAll();
-        if (globalAuthHandler) globalAuthHandler();
-        msg = '登录状态已过期，请重新登录';
+      }
+      // ⭐ 没 token 也静默
+      if (!storage.getToken()) {
+        return Promise.reject(error);
+      }
+      storage.clearAll();
+      if (globalAuthHandler) globalAuthHandler();
+      msg = '登录状态已过期，请重新登录';
       } else if (status === 403) {
         msg = '没有权限访问';
       } else if (status === 404) {

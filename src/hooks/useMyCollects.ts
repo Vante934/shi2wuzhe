@@ -26,11 +26,16 @@ export function useMyCollects() {
     }
   }, []);
 
-  useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-    fetchCollects();
-  }, [fetchCollects]);
+useEffect(() => {
+  if (hasFetchedRef.current) return;
+  
+  // ⭐ 没登录不拉收藏
+  const token = localStorage.getItem('shi2wuzhe_token');
+  if (!token) return;
+  
+  hasFetchedRef.current = true;
+  fetchCollects();
+}, [fetchCollects]);
 
   return {
     collectedRecipes,

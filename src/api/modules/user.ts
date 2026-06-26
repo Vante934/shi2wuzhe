@@ -17,6 +17,17 @@ export const userApi = {
     return request.put('/api/user/preference', data);
   },
 
+  /** 更新个人资料：昵称/头像/签名 */
+updateProfile(data: { nickName?: string; customAvatar?: string; bio?: string }) {
+   return request.put('/api/user/update-profile', data); 
+},
+
+/** 获取当前用户的扩展信息（头像、签名） */
+getMyExtend() {
+  return request.get<{ customAvatar?: string; bio?: string }>('/api/user/extend');
+},
+
+
   /**
    * 我的收藏列表
    * targetType: 1=菜谱  2=帖子

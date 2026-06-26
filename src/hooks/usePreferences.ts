@@ -13,12 +13,12 @@ import {
 } from '../api/mappers';
 
 const DEFAULT_PREFERENCES: PreferenceViewModel = {
-  cookingLevel: 'junior',
+  cookingLevel: 'senior',        // ⭐ 大佬
   tasteTendency: '不挑（默认）',
-  avoidIngredients: ['洋葱头'],
-  allergens: ['牛奶'],
+  avoidIngredients: [],          // ⭐ 无
+  allergens: [],                 // ⭐ 无
   commonTools: [],
-  mealReminder: true,
+  mealReminder: false,           // ⭐ 关
   reminderTime: '12:00',
 };
 
