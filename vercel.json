@@ -2,27 +2,27 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://ministry-bottles-described-light.trycloudflare.com/api/:path*"
+      "destination": "https://api.shi2wuzhe.cloud/api/:path*"
     },
     {
       "source": "/captchaImage",
-      "destination": "https://ministry-bottles-described-light.trycloudflare.com/captchaImage"
+      "destination": "https://api.shi2wuzhe.cloud/captchaImage"
     },
     {
       "source": "/login",
-      "destination": "https://ministry-bottles-described-light.trycloudflare.com/login"
+      "destination": "https://api.shi2wuzhe.cloud/login"
     },
     {
       "source": "/getInfo",
-      "destination": "https://ministry-bottles-described-light.trycloudflare.com/getInfo"
+      "destination": "https://api.shi2wuzhe.cloud/getInfo"
     },
     {
       "source": "/logout",
-      "destination": "https://ministry-bottles-described-light.trycloudflare.com/logout"
+      "destination": "https://api.shi2wuzhe.cloud/logout"
     },
     {
       "source": "/register",
-      "destination": "https://ministry-bottles-described-light.trycloudflare.com/register"
+      "destination": "https://api.shi2wuzhe.cloud/register"
     },
     {
       "source": "/((?!api).*)",
